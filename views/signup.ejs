@@ -1,33 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>BhaiChat | Signup</title>
+    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="icon" href="/images/WhiteLogo.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
-        <h2>Signup</h2>
-        <form action="/signup" method="POST">
-            <div>
-                <label for="username">Username:</label>
-                <input type="text" name="username" required>
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" name="password" required>
-            </div>
-            <button type="submit">Signup</button>
-        </form>
+        <img src="/images/image.png" alt="Main Logo" class="logo">
+        <div class="main">
+            <h2>Signup</h2>
+            <form action="/signup" class="form" method="POST">
+                <span class="input-span">
+                    <label for="username" class="label">Email</label>
+                    <input type="email" name="username" id="username" /></span>
+                <span class="input-span">
+                    <label for="password" class="label">Password</label>
+                    <input type="password" name="password" id="password" /></span>
+                
+                <button type="submit" class="submit">Sign Up</button>
+                <span class="span">Already have an account? <a href="login">Login</a></span>
+            </form>
 
-        <% if (error_message) { %>
-            <p><%= error_message %></p>
-        <% } %>
-
-        <% if (success_message) { %>
-            <p class="success-message"><%= success_message %></p>
-        <% } %>
+            <% if (error_message) { %>
+                <p>
+                    <%= error_message %>
+                </p>
+                <% } %>
+                    <% if (success_message) { %>
+                        <p class="success-message">
+                            <%= success_message %>
+                        </p>
+                        <% } %>
+        </div>
     </div>
 </body>
+
 </html>
