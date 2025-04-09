@@ -3,9 +3,17 @@ const passport = require('passport');
 const User = require('../models/User');
 const router = express.Router();
 
+// Middleware to ensure user is authenticated
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();  // Continue if authenticated
+    }
+    res.redirect('/login');  // Redirect to login if not authenticated
+}
+
 // Signup route
 router.get('/signup', (req, res) => {
-    res.render('signup');
+    res.render('auth/signup.ejs');
 });
 
 router.post('/signup', async (req, res) => {
@@ -37,21 +45,18 @@ router.post('/signup', async (req, res) => {
 
 // Login route
 router.get('/login', (req, res) => {
-    res.render('login');
+    res.render('auth/login.ejs');
 });
 
 router.post('/login', passport.authenticate('local', {
-    successRedirect: '/home',
+    successRedirect: '/',
     failureRedirect: '/login',
     failureFlash: true
 }));
 
-// Home route
-router.get('/home', (req, res) => {
-    if (!req.isAuthenticated()) {
-        return res.redirect('/login');
-    }
-    res.render('home', { user: req.user });
+// Home route (only accessible if logged in)
+router.get('/', isAuthenticated, (req, res) => {
+    res.render('home.ejs', { user: req.user });
 });
 
 // Logout route

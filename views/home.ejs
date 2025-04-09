@@ -1,11 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- layout('layouts/boilerplate') %>
 <head>
-    <meta charset="UTF-8">
-    <title>Home</title>
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-    <h2>Welcome, <%= user.username %></h2>
-    <a href="/logout">Logout</a>
+    <div class="topBar">
+        <div class="logo">
+            <img src="/images/WhiteLogo.png" alt="Logo of bhai Chat">
+            <div class="logoPara">
+                <p>Bhai GPT</p>
+            </div>
+        </div>
+
+        <div class="options">
+            <div class="textBtn">Text</div>
+            <div class="imageBtn">Image</div>
+            <div class="videoBtn">video</div>
+            <div class="voiceBtn">Voice</div>
+        </div>
+    </div>
+    <div class="sideBar"></div>
+    <div class="mainScreen"></div>
 </body>
-</html>
