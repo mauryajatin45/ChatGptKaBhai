@@ -117,7 +117,15 @@ app.use((req, res) => {
     res.status(404).render('404');
 });
 
-// ✅ Start the server
-app.listen(port, () => {
-    console.log(`🚀 Server running on http://localhost:${port}`);
-});
+// ✅ Conditional Server Start or Export
+
+// For local development, start the server normally.
+// For deployment on platforms like Vercel, export the app.
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`🚀 Server running on http://localhost:${port}`);
+    });
+} else {
+    module.exports = app;
+}
+
