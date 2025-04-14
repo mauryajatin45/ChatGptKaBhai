@@ -2,11 +2,11 @@ const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/User');
 
 module.exports = function (passport) {
-    passport.use(new LocalStrategy({ usernameField: 'username' }, async (username, password, done) => {
+    passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
         try {
-            const user = await User.findOne({ username });
+            const user = await User.findOne({ email });
             if (!user) {
-                return done(null, false, { message: 'Incorrect username.' });
+                return done(null, false, { message: 'Incorrect email.' });
             }
 
             const isMatch = await user.comparePassword(password);

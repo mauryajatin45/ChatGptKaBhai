@@ -1,23 +1,276 @@
 <%- layout('layouts/boilerplate') %>
 <head>
     <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="topBar">
-        <div class="logo">
-            <img src="/images/WhiteLogo.png" alt="Logo of bhai Chat">
-            <div class="logoPara">
-                <p>Bhai GPT</p>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="/images/WhiteLogo.png" alt="BhaiChat Logo" class="logo-img">
+                    <span class="logo-text">BhaiGPT</span>
+                </div>
+                <button class="new-chat-btn" id="newChatBtn">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+
+            <div class="chat-history">
+                <div class="history-header">
+                    <span>Recent Chats</span>
+                    <i class="fas fa-chevron-down" id="historyToggle"></i>
+                </div>
+                <ul class="history-list" id="historyList">
+                    <li class="history-item active">
+                        <i class="fas fa-comment"></i>
+                        <span>Getting started with AI</span>
+                    </li>
+                    <li class="history-item">
+                        <i class="fas fa-comment"></i>
+                        <span>JavaScript help</span>
+                    </li>
+                    <li class="history-item">
+                        <i class="fas fa-comment"></i>
+                        <span>Project ideas</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-profile" id="userProfile">
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="username"><%-user.username%></span>
+                        <span class="user-email"><%-user.email%></span>
+                    </div>
+                    <i class="fas fa-ellipsis-vertical"></i>
+                </div>
             </div>
         </div>
 
-        <div class="options">
-            <div class="textBtn">Text</div>
-            <div class="imageBtn">Image</div>
-            <div class="videoBtn">video</div>
-            <div class="voiceBtn">Voice</div>
+        <!-- Main Chat Area -->
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="welcome-screen" id="welcomeScreen">
+                    <h1>Welcome to BhaiGPT</h1>
+                    <div class="capabilities-container">
+                        <div class="capability-card">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>Examples</h3>
+                            <ul>
+                                <li class="example-query">"Explain quantum computing"</li>
+                                <li class="example-query">"Write a poem about AI"</li>
+                                <li class="example-query">"How to make HTTP requests?"</li>
+                            </ul>
+                        </div>
+                        <div class="capability-card">
+                            <i class="fas fa-bolt"></i>
+                            <h3>Capabilities</h3>
+                            <ul>
+                                <li>Text generation and analysis</li>
+                                <li>Image creation from text</li>
+                                <li>Voice interaction</li>
+                            </ul>
+                        </div>
+                        <div class="capability-card">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Limitations</h3>
+                            <ul>
+                                <li>May occasionally generate incorrect info</li>
+                                <li>Limited knowledge after 2023</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Chat messages will appear here -->
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="text"><i class="fas fa-comment"></i> Text</button>
+                    <button class="mode-btn" data-mode="image"><i class="fas fa-image"></i> Image</button>
+                    <button class="mode-btn" data-mode="video"><i class="fas fa-video"></i> Video</button>
+                    <button class="mode-btn" data-mode="voice"><i class="fas fa-microphone"></i> Voice</button>
+                </div>
+                <div class="message-input-wrapper">
+                    <textarea id="messageInput" placeholder="Message BhaiGPT..." rows="1"></textarea>
+                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="disclaimer">
+                    BhaiGPT may produce inaccurate information. Free Research Preview.
+                </div>
+            </div>
         </div>
     </div>
-    <div class="sideBar"></div>
-    <div class="mainScreen"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const newChatBtn = document.getElementById('newChatBtn');
+            const historyToggle = document.getElementById('historyToggle');
+            const historyList = document.getElementById('historyList');
+            const userProfile = document.getElementById('userProfile');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const modeBtns = document.querySelectorAll('.mode-btn');
+            const exampleQueries = document.querySelectorAll('.example-query');
+
+            // Current state
+            let currentMode = 'text';
+            let messages = [];
+            
+            // Auto-resize textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            // Toggle chat history visibility
+            historyToggle.addEventListener('click', function() {
+                historyList.classList.toggle('collapsed');
+                this.classList.toggle('fa-chevron-down');
+                this.classList.toggle('fa-chevron-up');
+            });
+
+            // New chat button
+            newChatBtn.addEventListener('click', function() {
+                // Clear current chat
+                messages = [];
+                chatMessages.innerHTML = '';
+                welcomeScreen.style.display = 'block';
+                
+                // Reset input
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                
+                // Show welcome screen
+                welcomeScreen.style.display = 'flex';
+            });
+
+            // Mode selection
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentMode = this.dataset.mode;
+                    updatePlaceholder();
+                });
+            });
+
+            function updatePlaceholder() {
+                const placeholders = {
+                    text: 'Message BhaiGPT...',
+                    image: 'Describe the image you want to generate...',
+                    video: 'Describe the video you want to generate...',
+                    voice: 'Click to speak or type your message...'
+                };
+                messageInput.placeholder = placeholders[currentMode];
+            }
+
+            // Example query click
+            exampleQueries.forEach(query => {
+                query.addEventListener('click', function() {
+                    messageInput.value = this.textContent.replace(/"/g, '');
+                    messageInput.focus();
+                });
+            });
+
+            // Send message
+            function sendMessage() {
+                const content = messageInput.value.trim();
+                if (!content) return;
+
+                // Hide welcome screen on first message
+                if (welcomeScreen.style.display !== 'none') {
+                    welcomeScreen.style.display = 'none';
+                }
+
+                // Add user message
+                addMessage('user', content);
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+
+                // Simulate AI response
+                setTimeout(() => {
+                    addMessage('assistant', getAIResponse(content));
+                }, 1000);
+            }
+
+            // Handle send button click and Enter key
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Add message to chat
+            function addMessage(role, content) {
+                const message = {
+                    role,
+                    content,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                messages.push(message);
+                renderMessages();
+                scrollToBottom();
+            }
+
+            // Render all messages
+            function renderMessages() {
+                chatMessages.innerHTML = messages.map(msg => `
+                    <div class="message ${msg.role}">
+                        <div class="message-avatar">
+                            ${msg.role === 'user' ? 
+                                '<i class="fas fa-user"></i>' : 
+                                '<img src="/images/WhiteLogo.png" alt="BhaiGPT" class="bot-avatar">'}
+                        </div>
+                        <div class="message-content">
+                            ${msg.content}
+                            <div class="message-timestamp">${msg.timestamp}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Simple AI response logic
+            function getAIResponse(input) {
+                const responses = {
+                    'hello': 'Hello there! How can I assist you today?',
+                    'hi': 'Hi! What would you like to know?',
+                    'how are you': "I'm an AI, so I don't have feelings, but I'm functioning well! How can I help you?",
+                    'default': `I received your ${currentMode} request: "${input}". This is a simulated response. In a real implementation, I would process your request properly.`
+                };
+
+                const lowerInput = input.toLowerCase();
+                for (const [key, response] of Object.entries(responses)) {
+                    if (lowerInput.includes(key)) {
+                        return response;
+                    }
+                }
+                return responses.default;
+            }
+
+            // Scroll to bottom of chat
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // User profile dropdown (would need additional HTML/CSS)
+            userProfile.addEventListener('click', function() {
+                // In a real app, this would toggle a dropdown menu
+                console.log('User profile clicked');
+            });
+        });
+    </script>
 </body>

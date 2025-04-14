@@ -6,108 +6,118 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const path = require('path');
 const ejsMate = require("ejs-mate");
-const LocalStrategy = require("passport-local").Strategy; // Ensure LocalStrategy is used from passport-local
+const LocalStrategy = require("passport-local").Strategy;
 const methodOverride = require('method-override');
+require('dotenv').config(); // Load env vars from .env
 
-// Import routes and passport strategy
-const authRoutes = require('./routes/authRoutes');
-const User = require('./models/User'); // Import your User model
-require('./config/passport')(passport); // Passport config
+// Import routes
+const authRoute = require('./routes/authRoute');
+const homeRoute = require('./routes/homeRoute');
 
-// Initialize the app
+// Import User model
+const User = require('./models/User');
+
+// Passport config (custom strategy file if using, otherwise configured below)
+require('./config/passport')(passport);
+
+// Initialize Express app
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// MongoDB Atlas connection
-mongoose.connect('mongodb+srv://jatin:jatin@authentication.mske3zp.mongodb.net/?retryWrites=true&w=majority&appName=Authentication')
-    .then(() => console.log('Connected to MongoDB Atlas'))
-    .catch((err) => console.log('MongoDB Connection Error: ', err));
+// ✅ Connect to MongoDB BhaiChat database
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+    .then(() => console.log('✅ Connected to MongoDB BhaiChat database'))
+    .catch((err) => console.log('❌ MongoDB Connection Error:', err));
 
-// Middleware
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));  // Specify views directory if needed
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.use(express.urlencoded({ extended: false }));
-app.engine("ejs", ejsMate);
-
-// Flash messages middleware
-app.use(flash());
-
-// Session options using MongoStore
+// ✅ Session configuration using connect-mongo
 const sessionpOptions = {
-  store: MongoStore.create({ 
-    mongoUrl: 'mongodb+srv://jatin:jatin@authentication.mske3zp.mongodb.net/?retryWrites=true&w=majority&appName=Authentication' 
-  }),
-  secret: "mysupersecretcode", // Change this to something more secure in production
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    httpOnly: true,
-  },
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+    }),
+    secret: process.env.SESSION_SECRET || 'mysupersecretcode',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true
+    }
 };
 
-// Session middleware should come before Passport
+// ✅ View engine & public assets
+app.engine("ejs", ejsMate);
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ✅ Body parser and method override
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+
+// ✅ Sessions and flash BEFORE passport
 app.use(session(sessionpOptions));
+app.use(flash());
 
-// Passport session initialization
-app.use(passport.initialize());  // Passport initialization (sets up passport)
-app.use(passport.session());  // Passport session (handles the user session)
+// ✅ Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
 
-// Passport LocalStrategy configuration
+// ✅ Passport LocalStrategy
 passport.use(new LocalStrategy({
-  usernameField: 'username', // Specify the username field (default is 'username')
-  passwordField: 'password'  // Specify the password field (default is 'password')
-}, async (username, password, done) => {
-  try {
-    const user = await User.findOne({ username });
-    if (!user) {
-      return done(null, false, { message: 'No user found' });
-    }
+    usernameField: 'email',
+    passwordField: 'password'
+}, async (email, password, done) => {
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return done(null, false, { message: 'No user found' });
+        }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return done(null, false, { message: 'Incorrect password' });
-    }
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return done(null, false, { message: 'Incorrect password' });
+        }
 
-    return done(null, user);  // User is authenticated
-  } catch (err) {
-    return done(err);
-  }
+        return done(null, user);
+    } catch (err) {
+        return done(err);
+    }
 }));
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+    done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err);
-  }
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
 });
 
-// Global variables for flash messages
+// ✅ Flash messages globally available in templates
 app.use((req, res, next) => {
-  res.locals.success_message = req.flash('success');
-  res.locals.error_message = req.flash('error');
-  next();
+    res.locals.success_message = req.flash('success');
+    res.locals.error_message = req.flash('error');
+    res.locals.currentUser = req.user || null;
+    next();
 });
 
-// Use authentication routes
-app.use(authRoutes);
+// ✅ Routes
+app.use(authRoute);
+app.use(homeRoute);
 
-// Handle any 404 errors
-app.use((req, res, next) => {
-  res.status(404).render('404.ejs');
+// ✅ 404 handler
+app.use((req, res) => {
+    res.status(404).render('404');
 });
 
-// Start the server
+// ✅ Start the server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+    console.log(`🚀 Server running on http://localhost:${port}`);
 });

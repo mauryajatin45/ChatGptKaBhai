@@ -17,31 +17,38 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-    const { username, password } = req.body;
+    let { username, email, password } = req.body;
 
-    // Basic validation
-    if (!username || !password) {
+    // Trim whitespace
+    username = username?.trim();
+    email = email?.trim();
+    password = password?.trim();
+
+    // Validate after trimming
+    if (!username || !email || !password) {
         req.flash('error', 'Please fill in all fields.');
         return res.redirect('/signup');
     }
 
     try {
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
-            req.flash('error', 'Username already exists.');
+            req.flash('error', 'Email already exists.');
             return res.redirect('/signup');
         }
 
-        const newUser = new User({ username, password });
+        const newUser = new User({ email, username, password });
         await newUser.save();
 
         req.flash('success', 'You are now registered!');
         res.redirect('/login');
     } catch (err) {
+        console.error(err); // Helpful for debugging!
         req.flash('error', 'Something went wrong. Please try again.');
         res.redirect('/signup');
     }
 });
+
 
 // Login route
 router.get('/login', (req, res) => {
@@ -55,9 +62,9 @@ router.post('/login', passport.authenticate('local', {
 }));
 
 // Home route (only accessible if logged in)
-router.get('/', isAuthenticated, (req, res) => {
-    res.render('home.ejs', { user: req.user });
-});
+// router.get('/', isAuthenticated, (req, res) => {
+//     res.render('home.ejs', { user: req.user });
+// });
 
 // Logout route
 router.get('/logout', (req, res) => {

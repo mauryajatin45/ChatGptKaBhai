@@ -1,112 +1,149 @@
-body {
-  font-family: "Roboto", sans-serif;
+/* Base Styles */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: #f0f0f0;
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
 }
 
 .container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-  height: 100vh;
-}
-
-img{
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  margin-left: 5px;
-  margin-top: 5px;
-  width: 50px;
-  height: 50px;
-}
-
-.main{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  width: 28%;
-  border: 1px solid black;
-  border-radius: 1rem;
-}
-.form {
-  --bg-light: #efefef;
-  --bg-dark: #707070;
-  --clr: #58bc82;
-  --clr-alpha: #9c9c9c60;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
   width: 100%;
-  max-width: 300px;
+  max-width: 400px;
 }
 
-.form .input-span {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.logo {
+  width: 120px;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
-.form input[type="email"],
-.form input[type="password"] {
-  border-radius: 0.5rem;
-  padding: 1rem 0.75rem;
-  width: 100%;
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: var(--clr-alpha);
-  outline: 2px solid var(--bg-dark);
+.main {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.form input[type="email"]:focus,
-.form input[type="password"]:focus {
-  outline: 2px solid var(--clr);
+.header {
+  margin-bottom: 2rem;
 }
 
-.label {
-  align-self: flex-start;
-  color: var(--clr);
-  font-weight: 600;
+.title {
+  font-family: 'Asap', sans-serif;
+  color: #2d3748;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
 }
 
-.form .submit {
-  padding: 1rem 0.75rem;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 3rem;
-  background-color: var(--bg-dark);
-  color: var(--bg-light);
-  border: none;
-  cursor: pointer;
-  transition: all 300ms;
-  font-weight: 600;
+.subtitle {
+  color: #718096;
   font-size: 0.9rem;
 }
 
-.form .submit:hover {
-  background-color: var(--clr);
-  color: var(--bg-dark);
+/* Form Styles */
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
 }
 
-.span {
+.form-label {
+  display: block;
+  color: #4a5568;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  margin-top: 1rem;
+}
+
+.submit-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+/* Link Styles */
+.alternative-action {
+  margin-top: 1.5rem;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.signup-link {
+  color: #667eea;
   text-decoration: none;
-  color: var(--bg-dark);
+  font-weight: 500;
 }
 
-.span a {
-  color: var(--clr);
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+/* Alert Messages */
+.alert {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: left;
+  display: none; /* Hidden by default */
+}
+
+.error-alert {
+  background: #fed7d7;
+  color: #c53030;
+  display: block; /* Only shows when has content */
+}
+
+.success-alert {
+  background: #c6f6d5;
+  color: #2f855a;
+  display: block; /* Only shows when has content */
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  body {
+      padding: 1rem;
+  }
+
+  .main {
+      padding: 1.5rem;
+  }
 }
