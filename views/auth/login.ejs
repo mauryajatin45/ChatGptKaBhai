@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BhaiChat | Login</title>
+    <title>BhaiGPT | Login</title>
     <link rel="icon" href="/images/WhiteLogo.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/auth.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,11 +12,16 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
         rel="stylesheet">
+    <link rel="icon" href="/images/Logo.png" type="image/png" sizes="16x16" />
+
 </head>
 
 <body>
     <div class="container">
-        <!-- <img src="/images/image.png" alt="Main Logo" class="logo"> -->
+        <div class="logo-container">
+            <img src="/images/Logo.png" alt="Logo" class="logo-white">
+            BhaiGPT
+        </div>
 
         <div class="main">
             <div class="header">
@@ -27,7 +32,9 @@
             <form action="/login" class="form" method="POST">
                 <div class="form-group">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" id="email" class="form-input" placeholder="Enter your email" required>                </div>
+                    <input type="email" name="email" id="email" class="form-input" placeholder="Enter your email"
+                        required>
+                </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
@@ -35,16 +42,16 @@
                 </div>
 
                 <div class="form-options">
-                    <label class="remember-me">
+                    <label class="remember-me" style="color: #d1d5db;">
                         <input type="checkbox"> Remember me
                     </label>
-                    <a href="#" class="forgot-password">Forgot password?</a>
+                    <a href="#" class="forgot-password" style="color: #10a37f;">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="submit-btn">Login</button>
 
                 <div class="alternative-action">
-                    Don't have an account? <a href="signup" class="signup-link">Sign up</a>
+                    Don't have an account? <a href="signup" class="signup-link" style="color: #10a37f;">Sign up</a>
                 </div>
             </form>
 

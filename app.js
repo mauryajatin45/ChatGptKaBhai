@@ -8,7 +8,7 @@ const path = require('path');
 const ejsMate = require("ejs-mate");
 const LocalStrategy = require("passport-local").Strategy;
 const methodOverride = require('method-override');
-require('dotenv').config(); // Load env vars from .env
+require('dotenv').config(); 
 
 // Import routes
 const authRoute = require('./routes/authRoute');
@@ -24,15 +24,12 @@ require('./config/passport')(passport);
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ Connect to MongoDB BhaiChat database
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+//Connect to MongoDB BhaiChat database
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB BhaiChat database'))
     .catch((err) => console.log('❌ MongoDB Connection Error:', err));
 
-// ✅ Session configuration using connect-mongo
+//Session configuration using connect-mongo
 const sessionpOptions = {
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
@@ -47,25 +44,25 @@ const sessionpOptions = {
     }
 };
 
-// ✅ View engine & public assets
+//View engine & public assets
 app.engine("ejs", ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ✅ Body parser and method override
+//Body parser and method override
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-// ✅ Sessions and flash BEFORE passport
+//Sessions and flash BEFORE passport
 app.use(session(sessionpOptions));
 app.use(flash());
 
-// ✅ Initialize passport
+//Initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ Passport LocalStrategy
+//Passport LocalStrategy
 passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
@@ -100,7 +97,7 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-// ✅ Flash messages globally available in templates
+//Flash messages globally available in templates
 app.use((req, res, next) => {
     res.locals.success_message = req.flash('success');
     res.locals.error_message = req.flash('error');
@@ -108,16 +105,16 @@ app.use((req, res, next) => {
     next();
 });
 
-// ✅ Routes
+//Routes
 app.use(authRoute);
 app.use(homeRoute);
 
-// ✅ 404 handler
+// 404 handler
 app.use((req, res) => {
     res.status(404).render('404');
 });
 
-// ✅ Conditional Server Start or Export
+// Conditional Server Start or Export
 
 // For local development, start the server normally.
 // For deployment on platforms like Vercel, export the app.

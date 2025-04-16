@@ -11,8 +11,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #343541;
   padding: 2rem;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .container {
@@ -21,17 +23,31 @@ body {
   max-width: 400px;
 }
 
-.logo {
-  width: 120px;
-  margin-bottom: 2rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  position: absolute;
+  width: 10rem;
+  top: 10px;
+  left: 10px;
+  color: white;
+  font-family: 'Asap', sans-serif;
+  font-size: 1.5rem;
+}
+
+.logo-container img {
+  width: 2rem;
+  height: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .main {
-  background: white;
+  background: #202123;
   padding: 2.5rem;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -40,13 +56,13 @@ body {
 
 .title {
   font-family: 'Asap', sans-serif;
-  color: #2d3748;
+  color: #ececf1;
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: #718096;
+  color: #d1d5db;
   font-size: 0.9rem;
 }
 
@@ -58,7 +74,7 @@ body {
 
 .form-label {
   display: block;
-  color: #4a5568;
+  color: #d1d5db;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
   font-weight: 500;
@@ -67,29 +83,63 @@ body {
 .form-input {
   width: 100%;
   padding: 0.8rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #40414f;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  background: #343541;
+  color: #ececf1;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #10a37f;
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.1);
 }
 
+/* OTP Specific Styles */
+.email-otp-container {
+  display: flex;
+  gap: 10px;
+  position: relative;
+}
+
+.otp-btn {
+  background: linear-gradient(135deg, #10a37f 0%, #0d7a5d 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.otp-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.otp-btn:disabled {
+  background: #40414f;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Submit Button */
 .submit-btn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #10a37f 0%, #0d7a5d 100%);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: all 0.3s ease;
   margin-top: 1rem;
 }
 
@@ -101,12 +151,12 @@ body {
 /* Link Styles */
 .alternative-action {
   margin-top: 1.5rem;
-  color: #718096;
+  color: #d1d5db;
   font-size: 0.9rem;
 }
 
 .signup-link {
-  color: #667eea;
+  color: #10a37f;
   text-decoration: none;
   font-weight: 500;
 }
@@ -122,28 +172,46 @@ body {
   border-radius: 8px;
   font-size: 0.9rem;
   text-align: left;
-  display: none; /* Hidden by default */
+  display: none!important;
 }
 
 .error-alert {
-  background: #fed7d7;
-  color: #c53030;
-  display: block; /* Only shows when has content */
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  display: block;
 }
 
 .success-alert {
-  background: #c6f6d5;
-  color: #2f855a;
-  display: block; /* Only shows when has content */
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  display: block;
 }
 
 /* Responsive Design */
 @media (max-width: 480px) {
   body {
-      padding: 1rem;
+    padding: 1rem;
   }
 
   .main {
-      padding: 1.5rem;
+    padding: 1.5rem;
   }
+
+  .email-otp-container {
+    flex-direction: column;
+  }
+
+  .otp-btn {
+    width: 100%;
+    padding: 0.8rem;
+  }
+}
+
+/* Countdown Timer Style */
+.otp-countdown {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
 }

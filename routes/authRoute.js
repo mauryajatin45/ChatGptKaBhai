@@ -2,16 +2,14 @@ const express = require('express');
 const passport = require('passport');
 const User = require('../models/User');
 const router = express.Router();
+const axios = require('axios');
+const FormData = require('form-data');
 
-// Middleware to ensure user is authenticated
-function isAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();  // Continue if authenticated
-    }
-    res.redirect('/login');  // Redirect to login if not authenticated
-}
+const url = 'https://smtp.maileroo.com/send';
+let data = new FormData();
 
-// Signup route
+
+
 router.get('/signup', (req, res) => {
     res.render('auth/signup.ejs');
 });
@@ -49,8 +47,6 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-
-// Login route
 router.get('/login', (req, res) => {
     res.render('auth/login.ejs');
 });
@@ -61,12 +57,6 @@ router.post('/login', passport.authenticate('local', {
     failureFlash: true
 }));
 
-// Home route (only accessible if logged in)
-// router.get('/', isAuthenticated, (req, res) => {
-//     res.render('home.ejs', { user: req.user });
-// });
-
-// Logout route
 router.get('/logout', (req, res) => {
     req.logout((err) => {
         if (err) {
@@ -74,6 +64,10 @@ router.get('/logout', (req, res) => {
         }
         res.redirect('/login');
     });
+});
+
+router.get('/verifyotp', async (req, res) => {
+   
 });
 
 module.exports = router;

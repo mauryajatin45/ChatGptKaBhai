@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BhaiChat | Signup</title>
+    <title>BhaiGPT | Signup</title>
     <link rel="stylesheet" href="/css/auth.css">
     <link rel="icon" href="/images/WhiteLogo.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,11 +12,15 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
         rel="stylesheet">
+    <link rel="icon" href="/images/Logo.png" type="image/png" sizes="16x16" />
 </head>
 
 <body>
     <div class="container">
-        
+        <div class="logo-container">
+            <img src="/images/Logo.png" alt="Logo" class="logo-white">
+            BhaiGPT
+        </div>
 
         <div class="main">
             <div class="header">
@@ -27,12 +31,20 @@
             <form action="/signup" class="form" method="POST">
                 <div class="form-group">
                     <label for="username" class="form-label">Name</label>
-                    <input type="Text" name="username" id="username" class="form-input" placeholder="Enter your Name" required>
+                    <input type="text" name="username" id="username" class="form-input" placeholder="Enter your Name" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" id="email" class="form-input" placeholder="Enter your email" required>
+                    <div class="email-otp-container">
+                        <input type="email" name="email" id="email" class="form-input" placeholder="Enter your email" required>
+                        <button type="button" id="sendOtpBtn" class="otp-btn">Send OTP</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="otp" class="form-label">OTP</label>
+                    <input type="text" name="otp" id="otp" class="form-input" placeholder="Enter your OTP" required>
                 </div>
 
                 <div class="form-group">
@@ -43,7 +55,7 @@
                 <button type="submit" class="submit-btn">Sign Up</button>
 
                 <div class="alternative-action">
-                    Already have an account? <a href="login" class="signup-link">Login</a>
+                    Already have an account? <a href="login" class="signup-link" style="color: #10a37f;">Login</a>
                 </div>
             </form>
 
@@ -60,6 +72,71 @@
             <% } %>
         </div>
     </div>
+
+    <script>
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+        let countdownInterval = null;
+
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function startCountdown(duration = 30) {
+            let timeLeft = duration;
+            sendOtpBtn.disabled = true;
+
+            countdownInterval = setInterval(() => {
+                sendOtpBtn.textContent = `Resend OTP (${timeLeft})`;
+                timeLeft--;
+
+                if (timeLeft < 0) {
+                    clearInterval(countdownInterval);
+                    sendOtpBtn.disabled = false;
+                    sendOtpBtn.textContent = 'Resend OTP';
+                }
+            }, 1000);
+        }
+
+        function handleOtpResponse(data) {
+            if (data.success) {
+                startCountdown();
+                alert('OTP sent successfully! Check your email.');
+            } else {
+                alert(data.error || 'Failed to send OTP');
+                sendOtpBtn.disabled = false;
+            }
+        }
+
+        sendOtpBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email || !isValidEmail(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            sendOtpBtn.disabled = true;
+            sendOtpBtn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/send-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+                handleOtpResponse(data);
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.textContent = 'Send OTP';
+            }
+        });
+    </script>
 </body>
 
 </html>
