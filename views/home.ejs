@@ -116,24 +116,78 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                // ... [keep existing DOM references and initial state]
+                // --- DOM References & Initial State ---
+                const historyList = document.getElementById('historyList');          // Sidebar list of chats
+                const welcomeScreen = document.getElementById('welcomeScreen');      // Welcome prompt container
+                const messageInput = document.getElementById('messageInput');        // Textarea for user input
+                const sendBtn = document.getElementById('sendBtn');                  // Send button
+                const modeBtns = document.querySelectorAll('.mode-btn');             // Controls for selecting mode (text/image/video/voice)
+                const chatMessages = document.getElementById('chatMessages');        // Container for chat message bubbles
         
-                // State variables
-                let currentChatId = null;
-                let isGenerating = false;
+                let currentChatId = null;    // Tracks which chat session is active
+                let isGenerating = false;     // Prevents duplicate requests while generating
+                let currentMode = 'text';     // Tracks currently selected mode
         
-                // Initialize chat list
+                // --- Helper: Update Input Placeholder Based on Mode ---
+                function updatePlaceholder() {
+                    switch (currentMode) {
+                        case 'text':
+                            messageInput.placeholder = 'Type your message here...';
+                            break;
+                        case 'image':
+                            messageInput.placeholder = 'Describe the image you want to generate...';
+                            break;
+                        case 'video':
+                            messageInput.placeholder = 'Describe the video you want to generate...';
+                            break;
+                        case 'voice':
+                            messageInput.placeholder = 'Enter the text to convert into speech...';
+                            break;
+                    }
+                }
+        
+                // --- UI State Toggles for Loading & Errors ---
+                function showLoadingState() {
+                    sendBtn.classList.add('loading');
+                    // You can also show a spinner here
+                }
+        
+                function removeLoadingState() {
+                    sendBtn.classList.remove('loading');
+                }
+        
+                function showError(message) {
+                    alert(`Error: ${message}`);
+                }
+        
+                // --- Mode Selection Handler ---
+                modeBtns.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        // Toggle active class on buttons
+                        modeBtns.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+        
+                        // Update mode & placeholder
+                        currentMode = this.dataset.mode;
+                        updatePlaceholder();
+        
+                        // Show or hide model selector (only for text mode)
+                        const modelSelector = document.querySelector('.model-selector');
+                        modelSelector.style.display = (currentMode === 'text') ? 'block' : 'none';
+                    });
+                });
+        
+                // --- Load & Render Chat Sessions ---
                 async function loadChatSessions() {
                     try {
                         const response = await fetch('/chats');
                         const data = await response.json();
                         renderChatList(data.chats);
-                    } catch (error) {
-                        console.error('Failed to load chats:', error);
+                    } catch (err) {
+                        console.error('Failed to load chats:', err);
                     }
                 }
         
-                // Render chat history list
                 function renderChatList(chats) {
                     historyList.innerHTML = chats.map(chat => `
                         <li class="history-item" data-chat-id="${chat._id}">
@@ -143,7 +197,7 @@
                         </li>
                     `).join('');
         
-                    // Add click handlers for chat items
+                    // Attach click events
                     document.querySelectorAll('.history-item').forEach(item => {
                         item.addEventListener('click', async () => {
                             currentChatId = item.dataset.chatId;
@@ -154,134 +208,169 @@
                     });
                 }
         
-                // Load messages for a chat
+                // --- Load Messages for a Chat ---
                 async function loadChatMessages(chatId) {
                     try {
                         const response = await fetch(`/chats/${chatId}`);
                         const { messages, title } = await response.json();
                         renderMessages(messages);
                         welcomeScreen.style.display = 'none';
-                    } catch (error) {
-                        console.error('Failed to load messages:', error);
+                    } catch (err) {
+                        console.error('Failed to load messages:', err);
                     }
                 }
         
-                // Create new chat
+                // --- Create a New Chat Session ---
                 async function createNewChat() {
                     try {
                         const model = document.getElementById('modelSelect').value;
                         const response = await fetch('/chats', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                title: `New Chat (${model})`,
-                                modelUsed: model
-                            })
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: `New Chat (${model})`, modelUsed: model })
                         });
-        
                         const newChat = await response.json();
                         currentChatId = newChat.id;
                         await loadChatSessions();
                         welcomeScreen.style.display = 'none';
-                    } catch (error) {
-                        console.error('Failed to create chat:', error);
+                    } catch (err) {
+                        console.error('Failed to create chat:', err);
                     }
                 }
         
-                // Modified sendMessage function
+                // --- Main Send Message Handler (Supports All Modes) ---
                 async function sendMessage() {
                     if (isGenerating) return;
-                    
                     const content = messageInput.value.trim();
                     if (!content) return;
-        
-                    if (!currentChatId) {
-                        await createNewChat();
-                    }
         
                     try {
                         isGenerating = true;
                         sendBtn.disabled = true;
+                        showLoadingState();
         
-                        // Add user message
-                        await addMessageToServer('user', content);
-                        
-                        // Add AI response
-                        const aiResponse = await generateAIResponse(content);
-                        await addMessageToServer('assistant', aiResponse);
+                        // Ensure a chat session exists
+                        if (!currentChatId) await createNewChat();
         
+                        // Save user message
+                        await addMessageToServer({ role: 'user', content, mode: currentMode, input: content });
+        
+                        // Generate AI response based on mode
+                        let response;
+                        switch (currentMode) {
+                            case 'text':  response = await generateTextResponse(content);  break;
+                            case 'image': response = await generateImageResponse(content); break;
+                            case 'video': response = await generateVideoResponse(content); break;
+                            case 'voice': response = await generateVoiceResponse(content); break;
+                            default: throw new Error('Invalid mode');
+                        }
+        
+                        // Save AI response
+                        await addMessageToServer({ role: 'assistant', content: response, mode: currentMode });
+        
+                        // Reset input
                         messageInput.value = '';
                         messageInput.style.height = 'auto';
-                    } catch (error) {
-                        console.error('Failed to send message:', error);
+                    } catch (err) {
+                        showError(err.message);
                     } finally {
                         isGenerating = false;
                         sendBtn.disabled = false;
+                        removeLoadingState();
                     }
                 }
         
-                async function addMessageToServer(role, content) {
+                // --- Persist Message & Re-render ---
+                async function addMessageToServer(message) {
                     const response = await fetch(`/chats/${currentChatId}/messages`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            content,
-                            role
-                        })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(message)
                     });
-        
                     const { messages } = await response.json();
                     renderMessages(messages);
+                }
+        
+                // --- Generation Handlers for Each Mode ---
+                async function generateTextResponse(prompt) {
+                    const res = await fetch('/api/generate/text', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, model: document.getElementById('modelSelect').value })
+                    });
+                    const data = await res.json();
+                    return data.text;
+                }
+        
+                async function generateImageResponse(description) {
+                    const res = await fetch('/api/generate/image', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description, size: '1024x1024' })
+                    });
+                    const data = await res.json();
+                    return data.image_url;
+                }
+        
+                async function generateVideoResponse(description) {
+                    const res = await fetch('/api/generate/video', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description, duration: 30 })
+                    });
+                    const data = await res.json();
+                    return data.video_url;
+                }
+        
+                async function generateVoiceResponse(text) {
+                    const res = await fetch('/api/generate/voice', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text, voice: 'nova' })
+                    });
+                    const data = await res.json();
+                    return data.audio_url;
+                }
+        
+                // --- Render Chat Messages in UI ---
+                function renderMessages(messages) {
+                    chatMessages.innerHTML = messages.map(msg => `
+                        <div class="message ${msg.role}">
+                            <div class="message-avatar">
+                                ${msg.role === 'user' ? '<i class="fas fa-user"></i>' : '<img src="/images/WhiteLogo.png" alt="BhaiGPT" class="bot-avatar">'}
+                            </div>
+                            <div class="message-content">
+                                ${msg.mode === 'image'   ? `<img src="${msg.content}" class="generated-image" alt="Generated image">`  :
+                                 msg.mode === 'video'   ? `<video controls src="${msg.content}" class="generated-video"></video>` :
+                                 msg.mode === 'voice'   ? `<audio controls src="${msg.content}"></audio>`                   :
+                                                            msg.content}
+                                <div class="message-meta">
+                                    <span class="mode-tag">${msg.mode}</span>
+                                    <span class="message-timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
                     scrollToBottom();
                 }
         
-                async function generateAIResponse(prompt) {
-                    try {
-                        // Replace with actual AI API call
-                        const response = await fetch('/api/generate', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                prompt,
-                                model: document.getElementById('modelSelect').value
-                            })
-                        });
-        
-                        const data = await response.json();
-                        return data.text;
-                    } catch (error) {
-                        console.error('AI Generation failed:', error);
-                        return "Sorry, I'm having trouble responding right now.";
-                    }
+                // --- Scroll Chat to Bottom ---
+                function scrollToBottom() {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
         
-                // Delete chat handler
+                // --- Delete Chat Session Handler ---
                 async function deleteChat(chatId) {
                     if (confirm('Are you sure you want to delete this chat?')) {
-                        try {
-                            await fetch(`/chats/${chatId}`, { method: 'DELETE' });
-                            if (currentChatId === chatId) {
-                                currentChatId = null;
-                                welcomeScreen.style.display = 'flex';
-                            }
-                            await loadChatSessions();
-                        } catch (error) {
-                            console.error('Failed to delete chat:', error);
+                        await fetch(`/chats/${chatId}`, { method: 'DELETE' });
+                        if (currentChatId === chatId) {
+                            currentChatId = null;
+                            welcomeScreen.style.display = 'flex';
+                            chatMessages.innerHTML = '';
                         }
+                        await loadChatSessions();
                     }
                 }
         
-                // Initial load
+                // --- Initialize on Load ---
                 loadChatSessions();
-        
-                // ... [keep existing helper functions like renderMessages, scrollToBottom etc]
-                // Modify renderMessages to use actual message data
             });
         </script>
+        
     </body>

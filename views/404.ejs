@@ -1,0 +1,95 @@
+<%- layout('layouts/boilerplate') %>
+<head>
+    <title>Page Not Found</title>
+    <style>
+        :root {
+            --primary-color: #10a37f;
+            --primary-dark: #0d8466;
+            --sidebar-bg: #202123;
+            --main-bg: #343541;
+            --chat-bg: #444654;
+            --text-color: #ececf1;
+            --text-secondary: #d1d5db;
+            --border-color: #4d4d4f;
+        }
+
+        body {
+            background-color: var(--main-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .error-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-color: var(--chat-bg);
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            color: var(--primary-color);
+            margin: 0 0 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .error-message {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 0 2rem;
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+            font-weight: 500;
+        }
+
+        .home-link:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Optional: Add if using icons */
+        .icon {
+            width: 1.2em;
+            height: 1.2em;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1 class="error-code">404</h1>
+        
+        <div class="error-content">
+            <p class="error-message">
+                The page you're looking for has vanished into the digital void.
+            </p>
+            
+            <a href="/" class="home-link">
+                <!-- Optional SVG icon -->
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Return to Safety
+            </a>
+        </div>
+    </div>
+</body>
