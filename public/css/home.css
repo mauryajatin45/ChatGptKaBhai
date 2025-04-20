@@ -96,6 +96,7 @@ body {
 
 .history-list {
     list-style: none;
+    padding-left: 0 !important;
 }
 
 .history-item {
@@ -221,6 +222,7 @@ body {
     color: var(--text-secondary);
 }
 
+
 /* Input Area Styles */
 .input-container {
     padding: 20px;
@@ -230,11 +232,32 @@ body {
     width: 100%;
 }
 
+.model-selector {
+    position: fixed;
+    top: 1.5rem;
+    right: 2rem;
+    z-index: 9999;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    /* Optional shadow */
+}
+
+select {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+}
+
+option {
+    color: var(--text-color);
+}
+
 .mode-selector {
     display: flex;
-    gap: 10px;
     justify-content: center;
-    margin-bottom: 15px;
+    align-items: center;
+    gap: 1rem;
 }
 
 .mode-btn {
@@ -259,6 +282,7 @@ body {
     position: relative;
     display: flex;
     align-items: center;
+    margin-top: 1rem;
 }
 
 .message-input-wrapper textarea {
@@ -294,12 +318,38 @@ body {
     margin-top: 15px;
 }
 
+/* Add to home.css */
+.delete-chat {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.delete-chat:hover {
+    color: #ff4444;
+}
+
+.loading-dots:after {
+    content: '.';
+    animation: dots 1s steps(5, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
         width: 220px;
     }
-    
+
     .capabilities-container {
         flex-direction: column;
     }
@@ -307,14 +357,16 @@ body {
 
 @media (max-width: 576px) {
     .sidebar {
-        display: none; /* Hide sidebar on mobile */
+        display: none;
+        /* Hide sidebar on mobile */
     }
-    
+
     .input-container {
         padding: 15px;
     }
-    
+
     .mode-selector {
+        display: flex;
         overflow-x: auto;
         justify-content: flex-start;
         padding-bottom: 10px;
@@ -372,8 +424,15 @@ body {
 
 /* Animation for new messages */
 @keyframes messageAppear {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message {

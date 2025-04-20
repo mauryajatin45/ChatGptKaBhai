@@ -1,277 +1,287 @@
 <%- layout('layouts/boilerplate') %>
-<head>
-    <link rel="stylesheet" href="/css/home.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>BhaiGPT</title>
-</head>
-<body>
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <img src="/images/Logo.png" alt="BhaiChat Logo" class="logo-img">
-                    <span class="logo-text">BhaiGPT</span>
+
+    <head>
+        <link rel="stylesheet" href="/css/home.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <title>BhaiGPT</title>
+    </head>
+
+    <body>
+        <div class="app-container">
+            <!-- Sidebar Navigation -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo-container">
+                        <img src="/images/Logo.png" alt="BhaiChat Logo" class="logo-img">
+                        <span class="logo-text">BhaiGPT</span>
+                    </div>
+                    <button class="new-chat-btn" id="newChatBtn">
+                        <i class="fas fa-plus"></i> New Chat
+                    </button>
                 </div>
-                <button class="new-chat-btn" id="newChatBtn">
-                    <i class="fas fa-plus"></i> New Chat
-                </button>
+
+                <div class="chat-history">
+                    <div class="history-header">
+                        <span>Recent Chats</span>
+                        <i class="fas fa-chevron-down" id="historyToggle"></i>
+                    </div>
+                    <ul class="history-list" id="historyList">
+                        <% chats.forEach(chat => { %>
+                            <li class="history-item" data-chat-id="<%= chat._id %>">
+                                <i class="fas fa-comment"></i>
+                                <span><%= chat.title %></span>
+                                <button class="delete-chat" onclick="deleteChat('<%= chat._id %>')">&times;</button>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+
+                <div class="sidebar-footer">
+                    <div class="user-profile" id="userProfile">
+                        <div class="avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-info">
+                            <span class="username"><%-user.username%></span>
+                            <span class="user-email"><%-user.email%></span>
+                        </div>
+                        <i class="fas fa-ellipsis-vertical"></i>
+                    </div>
+                </div>
             </div>
 
-            <div class="chat-history">
-                <div class="history-header">
-                    <span>Recent Chats</span>
-                    <i class="fas fa-chevron-down" id="historyToggle"></i>
+            <!-- Main Chat Area -->
+            <div class="main-content">
+                <div class="model-selector">
+                    <select id="modelSelect">
+                        <option value="llama-3.1">llama-3.1</option>
+                        <option value="llama-3.3">llama-3.3</option>
+                    </select>
                 </div>
-                <ul class="history-list" id="historyList">
-                    <li class="history-item active">
-                        <i class="fas fa-comment"></i>
-                        <span>Getting started with AI</span>
-                    </li>
-                    <li class="history-item">
-                        <i class="fas fa-comment"></i>
-                        <span>JavaScript help</span>
-                    </li>
-                    <li class="history-item">
-                        <i class="fas fa-comment"></i>
-                        <span>Project ideas</span>
-                    </li>
-                </ul>
-            </div>
+                <div class="chat-container">
+                    <div class="welcome-screen" id="welcomeScreen">
+                        <h1>Welcome to BhaiGPT</h1>
+                        <div class="capabilities-container">
+                            <div class="capability-card">
+                                <i class="fas fa-lightbulb"></i>
+                                <h3>Examples</h3>
+                                <ul>
+                                    <li class="example-query">"Explain quantum computing"</li>
+                                    <li class="example-query">"Write a poem about AI"</li>
+                                    <li class="example-query">"How to make HTTP requests?"</li>
+                                </ul>
+                            </div>
+                            <div class="capability-card">
+                                <i class="fas fa-bolt"></i>
+                                <h3>Capabilities</h3>
+                                <ul>
+                                    <li>Text generation and analysis</li>
+                                    <li>Image creation from text</li>
+                                    <li>Voice interaction</li>
+                                </ul>
+                            </div>
+                            <div class="capability-card">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Limitations</h3>
+                                <ul>
+                                    <li>May occasionally generate incorrect info</li>
+                                    <li>Limited knowledge after 2023</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="sidebar-footer">
-                <div class="user-profile" id="userProfile">
-                    <div class="avatar">
-                        <i class="fas fa-user"></i>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Chat messages will appear here -->
                     </div>
-                    <div class="user-info">
-                        <span class="username"><%-user.username%></span>
-                        <span class="user-email"><%-user.email%></span>
+                </div>
+
+                <div class="input-container">
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="text"><i class="fas fa-comment"></i> Text</button>
+                        <button class="mode-btn" data-mode="image"><i class="fas fa-image"></i> Image</button>
+                        <button class="mode-btn" data-mode="video"><i class="fas fa-video"></i> Video</button>
+                        <button class="mode-btn" data-mode="voice"><i class="fas fa-microphone"></i> Voice</button>
                     </div>
-                    <i class="fas fa-ellipsis-vertical"></i>
+                    <div class="message-input-wrapper">
+                        <textarea id="messageInput" placeholder="Message BhaiGPT..." rows="1"></textarea>
+                        <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <div class="disclaimer">
+                        BhaiGPT may produce inaccurate information. Your data is used to train our models. Please do not share sensitive information. <br> By using this service, you agree to our terms and conditions.
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Chat Area -->
-        <div class="main-content">
-            <div class="chat-container">
-                <div class="welcome-screen" id="welcomeScreen">
-                    <h1>Welcome to BhaiGPT</h1>
-                    <div class="capabilities-container">
-                        <div class="capability-card">
-                            <i class="fas fa-lightbulb"></i>
-                            <h3>Examples</h3>
-                            <ul>
-                                <li class="example-query">"Explain quantum computing"</li>
-                                <li class="example-query">"Write a poem about AI"</li>
-                                <li class="example-query">"How to make HTTP requests?"</li>
-                            </ul>
-                        </div>
-                        <div class="capability-card">
-                            <i class="fas fa-bolt"></i>
-                            <h3>Capabilities</h3>
-                            <ul>
-                                <li>Text generation and analysis</li>
-                                <li>Image creation from text</li>
-                                <li>Voice interaction</li>
-                            </ul>
-                        </div>
-                        <div class="capability-card">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Limitations</h3>
-                            <ul>
-                                <li>May occasionally generate incorrect info</li>
-                                <li>Limited knowledge after 2023</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chat-messages" id="chatMessages">
-                    <!-- Chat messages will appear here -->
-                </div>
-            </div>
-
-            <div class="input-container">
-                <div class="mode-selector">
-                    <button class="mode-btn active" data-mode="text"><i class="fas fa-comment"></i> Text</button>
-                    <button class="mode-btn" data-mode="image"><i class="fas fa-image"></i> Image</button>
-                    <button class="mode-btn" data-mode="video"><i class="fas fa-video"></i> Video</button>
-                    <button class="mode-btn" data-mode="voice"><i class="fas fa-microphone"></i> Voice</button>
-                </div>
-                <div class="message-input-wrapper">
-                    <textarea id="messageInput" placeholder="Message BhaiGPT..." rows="1"></textarea>
-                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-                </div>
-                <div class="disclaimer">
-                    BhaiGPT may produce inaccurate information. Free Research Preview.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // DOM Elements
-            const newChatBtn = document.getElementById('newChatBtn');
-            const historyToggle = document.getElementById('historyToggle');
-            const historyList = document.getElementById('historyList');
-            const userProfile = document.getElementById('userProfile');
-            const welcomeScreen = document.getElementById('welcomeScreen');
-            const chatMessages = document.getElementById('chatMessages');
-            const messageInput = document.getElementById('messageInput');
-            const sendBtn = document.getElementById('sendBtn');
-            const modeBtns = document.querySelectorAll('.mode-btn');
-            const exampleQueries = document.querySelectorAll('.example-query');
-
-            // Current state
-            let currentMode = 'text';
-            let messages = [];
-            
-            // Auto-resize textarea
-            messageInput.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-
-            // Toggle chat history visibility
-            historyToggle.addEventListener('click', function() {
-                historyList.classList.toggle('collapsed');
-                this.classList.toggle('fa-chevron-down');
-                this.classList.toggle('fa-chevron-up');
-            });
-
-            // New chat button
-            newChatBtn.addEventListener('click', function() {
-                // Clear current chat
-                messages = [];
-                chatMessages.innerHTML = '';
-                welcomeScreen.style.display = 'block';
-                
-                // Reset input
-                messageInput.value = '';
-                messageInput.style.height = 'auto';
-                
-                // Show welcome screen
-                welcomeScreen.style.display = 'flex';
-            });
-
-            // Mode selection
-            modeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    modeBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentMode = this.dataset.mode;
-                    updatePlaceholder();
-                });
-            });
-
-            function updatePlaceholder() {
-                const placeholders = {
-                    text: 'Message BhaiGPT...',
-                    image: 'Describe the image you want to generate...',
-                    video: 'Describe the video you want to generate...',
-                    voice: 'Click to speak or type your message...'
-                };
-                messageInput.placeholder = placeholders[currentMode];
-            }
-
-            // Example query click
-            exampleQueries.forEach(query => {
-                query.addEventListener('click', function() {
-                    messageInput.value = this.textContent.replace(/"/g, '');
-                    messageInput.focus();
-                });
-            });
-
-            // Send message
-            function sendMessage() {
-                const content = messageInput.value.trim();
-                if (!content) return;
-
-                // Hide welcome screen on first message
-                if (welcomeScreen.style.display !== 'none') {
-                    welcomeScreen.style.display = 'none';
-                }
-
-                // Add user message
-                addMessage('user', content);
-                messageInput.value = '';
-                messageInput.style.height = 'auto';
-
-                // Simulate AI response
-                setTimeout(() => {
-                    addMessage('assistant', getAIResponse(content));
-                }, 1000);
-            }
-
-            // Handle send button click and Enter key
-            sendBtn.addEventListener('click', sendMessage);
-            messageInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-
-            // Add message to chat
-            function addMessage(role, content) {
-                const message = {
-                    role,
-                    content,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                };
-                messages.push(message);
-                renderMessages();
-                scrollToBottom();
-            }
-
-            // Render all messages
-            function renderMessages() {
-                chatMessages.innerHTML = messages.map(msg => `
-                    <div class="message ${msg.role}">
-                        <div class="message-avatar">
-                            ${msg.role === 'user' ? 
-                                '<i class="fas fa-user"></i>' : 
-                                '<img src="/images/WhiteLogo.png" alt="BhaiGPT" class="bot-avatar">'}
-                        </div>
-                        <div class="message-content">
-                            ${msg.content}
-                            <div class="message-timestamp">${msg.timestamp}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Simple AI response logic
-            function getAIResponse(input) {
-                const responses = {
-                    'hello': 'Hello there! How can I assist you today?',
-                    'hi': 'Hi! What would you like to know?',
-                    'how are you': "I'm an AI, so I don't have feelings, but I'm functioning well! How can I help you?",
-                    'default': `I received your ${currentMode} request: "${input}". This is a simulated response. In a real implementation, I would process your request properly.`
-                };
-
-                const lowerInput = input.toLowerCase();
-                for (const [key, response] of Object.entries(responses)) {
-                    if (lowerInput.includes(key)) {
-                        return response;
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // ... [keep existing DOM references and initial state]
+        
+                // State variables
+                let currentChatId = null;
+                let isGenerating = false;
+        
+                // Initialize chat list
+                async function loadChatSessions() {
+                    try {
+                        const response = await fetch('/chats');
+                        const data = await response.json();
+                        renderChatList(data.chats);
+                    } catch (error) {
+                        console.error('Failed to load chats:', error);
                     }
                 }
-                return responses.default;
-            }
-
-            // Scroll to bottom of chat
-            function scrollToBottom() {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-
-            // User profile dropdown (would need additional HTML/CSS)
-            userProfile.addEventListener('click', function() {
-                // In a real app, this would toggle a dropdown menu
-                console.log('User profile clicked');
+        
+                // Render chat history list
+                function renderChatList(chats) {
+                    historyList.innerHTML = chats.map(chat => `
+                        <li class="history-item" data-chat-id="${chat._id}">
+                            <i class="fas fa-comment"></i>
+                            <span>${chat.title}</span>
+                            <button class="delete-chat" onclick="deleteChat('${chat._id}')">&times;</button>
+                        </li>
+                    `).join('');
+        
+                    // Add click handlers for chat items
+                    document.querySelectorAll('.history-item').forEach(item => {
+                        item.addEventListener('click', async () => {
+                            currentChatId = item.dataset.chatId;
+                            await loadChatMessages(currentChatId);
+                            document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+                            item.classList.add('active');
+                        });
+                    });
+                }
+        
+                // Load messages for a chat
+                async function loadChatMessages(chatId) {
+                    try {
+                        const response = await fetch(`/chats/${chatId}`);
+                        const { messages, title } = await response.json();
+                        renderMessages(messages);
+                        welcomeScreen.style.display = 'none';
+                    } catch (error) {
+                        console.error('Failed to load messages:', error);
+                    }
+                }
+        
+                // Create new chat
+                async function createNewChat() {
+                    try {
+                        const model = document.getElementById('modelSelect').value;
+                        const response = await fetch('/chats', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                title: `New Chat (${model})`,
+                                modelUsed: model
+                            })
+                        });
+        
+                        const newChat = await response.json();
+                        currentChatId = newChat.id;
+                        await loadChatSessions();
+                        welcomeScreen.style.display = 'none';
+                    } catch (error) {
+                        console.error('Failed to create chat:', error);
+                    }
+                }
+        
+                // Modified sendMessage function
+                async function sendMessage() {
+                    if (isGenerating) return;
+                    
+                    const content = messageInput.value.trim();
+                    if (!content) return;
+        
+                    if (!currentChatId) {
+                        await createNewChat();
+                    }
+        
+                    try {
+                        isGenerating = true;
+                        sendBtn.disabled = true;
+        
+                        // Add user message
+                        await addMessageToServer('user', content);
+                        
+                        // Add AI response
+                        const aiResponse = await generateAIResponse(content);
+                        await addMessageToServer('assistant', aiResponse);
+        
+                        messageInput.value = '';
+                        messageInput.style.height = 'auto';
+                    } catch (error) {
+                        console.error('Failed to send message:', error);
+                    } finally {
+                        isGenerating = false;
+                        sendBtn.disabled = false;
+                    }
+                }
+        
+                async function addMessageToServer(role, content) {
+                    const response = await fetch(`/chats/${currentChatId}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            content,
+                            role
+                        })
+                    });
+        
+                    const { messages } = await response.json();
+                    renderMessages(messages);
+                    scrollToBottom();
+                }
+        
+                async function generateAIResponse(prompt) {
+                    try {
+                        // Replace with actual AI API call
+                        const response = await fetch('/api/generate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                prompt,
+                                model: document.getElementById('modelSelect').value
+                            })
+                        });
+        
+                        const data = await response.json();
+                        return data.text;
+                    } catch (error) {
+                        console.error('AI Generation failed:', error);
+                        return "Sorry, I'm having trouble responding right now.";
+                    }
+                }
+        
+                // Delete chat handler
+                async function deleteChat(chatId) {
+                    if (confirm('Are you sure you want to delete this chat?')) {
+                        try {
+                            await fetch(`/chats/${chatId}`, { method: 'DELETE' });
+                            if (currentChatId === chatId) {
+                                currentChatId = null;
+                                welcomeScreen.style.display = 'flex';
+                            }
+                            await loadChatSessions();
+                        } catch (error) {
+                            console.error('Failed to delete chat:', error);
+                        }
+                    }
+                }
+        
+                // Initial load
+                loadChatSessions();
+        
+                // ... [keep existing helper functions like renderMessages, scrollToBottom etc]
+                // Modify renderMessages to use actual message data
             });
-        });
-    </script>
-</body>
+        </script>
+    </body>
