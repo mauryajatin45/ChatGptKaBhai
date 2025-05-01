@@ -8,7 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/project/bhaivhat",
+      "src": "/project/bhaichat",
       "dest": "/app.js"
     },
     {

@@ -106,12 +106,12 @@ app.use((req, res, next) => {
     next();
 });
 
-// Proxy route for "/project/bhaivhat"
-app.use('/project/bhaivhat', createProxyMiddleware({
+// Proxy route for "/project/bhaichat"
+app.use('/project/bhaichat', createProxyMiddleware({
     target: 'https://bhaichat.vercel.app/login',  // The target URL to proxy to
     changeOrigin: true,  // Changes the origin of the request to the target URL
     pathRewrite: {
-        '^/project/bhaivhat': '',  // Rewriting the path if needed
+        '^/project/bhaichat': '',  // Rewriting the path if needed
     },
     onProxyRes: (proxyRes, req, res) => {
         // Optionally you can modify response headers here if necessary
