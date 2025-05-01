@@ -8,6 +8,7 @@ const path = require('path');
 const ejsMate = require("ejs-mate");
 const LocalStrategy = require("passport-local").Strategy;
 const methodOverride = require('method-override');
+const { createProxyMiddleware } = require('http-proxy-middleware');  // Import proxy middleware
 require('dotenv').config(); 
 
 // Import routes
@@ -24,12 +25,12 @@ require('./config/passport')(passport);
 const app = express();
 const port = process.env.PORT || 3000;
 
-//Connect to MongoDB BhaiChat database
+// Connect to MongoDB BhaiChat database
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB BhaiChat database'))
     .catch((err) => console.log('❌ MongoDB Connection Error:', err));
 
-//Session configuration using connect-mongo
+// Session configuration using connect-mongo
 const sessionpOptions = {
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
@@ -44,25 +45,25 @@ const sessionpOptions = {
     }
 };
 
-//View engine & public assets
+// View engine & public assets
 app.engine("ejs", ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-//Body parser and method override
+// Body parser and method override
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
-//Sessions and flash BEFORE passport
+// Sessions and flash BEFORE passport
 app.use(session(sessionpOptions));
 app.use(flash());
 
-//Initialize passport
+// Initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-//Passport LocalStrategy
+// Passport LocalStrategy
 passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
@@ -97,7 +98,7 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-//Flash messages globally available in templates
+// Flash messages globally available in templates
 app.use((req, res, next) => {
     res.locals.success_message = req.flash('success');
     res.locals.error_message = req.flash('error');
@@ -105,7 +106,20 @@ app.use((req, res, next) => {
     next();
 });
 
-//Routes
+// Proxy route for "/project/bhaivhat"
+app.use('/project/bhaivhat', createProxyMiddleware({
+    target: 'https://bhaichat.vercel.app/login',  // The target URL to proxy to
+    changeOrigin: true,  // Changes the origin of the request to the target URL
+    pathRewrite: {
+        '^/project/bhaivhat': '',  // Rewriting the path if needed
+    },
+    onProxyRes: (proxyRes, req, res) => {
+        // Optionally you can modify response headers here if necessary
+        proxyRes.headers['X-Forwarded-For'] = req.connection.remoteAddress;
+    }
+}));
+
+// Routes
 app.use(authRoute);
 app.use(homeRoute);
 
@@ -115,7 +129,6 @@ app.use((req, res) => {
 });
 
 // Conditional Server Start or Export
-
 // For local development, start the server normally.
 // For deployment on platforms like Vercel, export the app.
 if (require.main === module) {
